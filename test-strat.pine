@@ -1,0 +1,45 @@
+//@version=4
+strategy("kulaizki 1", overlay=true)
+
+// input
+lookback_period = input(20, title="Lookback Period")
+trend_period = input(20, title="Trend Period")
+exit_period = input(10, title="Exit Period")
+
+// turtle soup
+hl2 = (high + low) / 2
+highest_high = highest(high, lookback_period)
+lowest_low = lowest(low, lookback_period)
+buy_condition = crossover(close, highest_high)
+sell_condition = crossunder(close, lowest_low)
+
+// trend
+trend = ema(close, trend_period)
+
+// exit conditions
+exit_long = crossover(close, ema(close, exit_period))
+exit_short = crossunder(close, ema(close, exit_period))
+
+// order blocks
+order_block_high = highest(high, lookback_period)
+order_block_low = lowest(low, lookback_period)
+
+// volume confirmation
+volume_condition = volume > sma(volume, lookback_period)
+
+// trading signals
+if buy_condition and volume_condition
+    strategy.entry("Buy", strategy.long)
+if exit_long
+    strategy.close("Buy")
+if sell_condition and volume_condition
+    strategy.entry("Sell", strategy.short)
+if exit_short
+    strategy.close("Sell")
+
+// plotting
+plotshape(buy_condition and volume_condition, title="Buy Signal", location=location.belowbar, color=color.green, style=shape.labelup, text="Buy")
+plotshape(sell_condition and volume_condition, title="Sell Signal", location=location.abovebar, color=color.red, style=shape.labeldown, text="Sell")
+plot(trend, color=color.blue, title="Trend")
+plot(order_block_high, color=color.rgb(200, 255, 0), title="Order Block High")
+plot(order_block_low, color=color.rgb(200, 255, 0), title="Order Block Low")
