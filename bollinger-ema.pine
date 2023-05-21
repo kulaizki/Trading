@@ -1,13 +1,13 @@
 //@version=4
 strategy("Advanced EMA + Bollinger Bands Strategy", overlay=true)
 
-// inputs
+// === Inputs ===
 emaLength = input(20, title="EMA Length")
 bbLength = input(20, title="Bollinger Bands Length")
 bbMultiplier = input(2.0, title="Bollinger Bands Multiplier")
 volumeMultiplier = input(1.5, title="Volume Multiplier")
 
-// calculations
+// === Calculations ===
 ema = ema(close, emaLength)
 basis = sma(close, bbLength)
 deviation = bbMultiplier * stdev(close, bbLength)
@@ -15,18 +15,22 @@ upperBand = basis + deviation
 lowerBand = basis - deviation
 volumeThreshold = volume * volumeMultiplier
 
-// conditions
+// === Conditions ===
 isAboveEMA = close > ema
 isAboveUpperBand = close > upperBand
 isBelowLowerBand = close < lowerBand
 isVolumeAboveThreshold = volume > volumeThreshold
 
-// strategy
-strategy.entry("Buy", strategy.long, when=isAboveEMA and isAboveUpperBand and isVolumeAboveThreshold)
-strategy.close("Buy", when=isBelowLowerBand)
+// === Strategy ===
+strategy.entry("Buy", strategy.long, when=isAboveEMA and isBelowLowerBand and isVolumeAboveThreshold)
+strategy.close("Buy", when=isAboveUpperBand)
 
-// plotting
+// === Plotting ===
 plot(ema, color=color.blue, title="EMA")
 plot(basis, color=color.gray, title="Bollinger Bands Basis")
 plot(upperBand, color=color.red, title="Bollinger Bands Upper")
 plot(lowerBand, color=color.green, title="Bollinger Bands Lower")
+
+// === Buy and Sell Labels ===
+plotshape(series=isAboveUpperBand, title="Sell Signal", text="SELL", color=color.red, location=location.abovebar, style=shape.labeldown, textcolor=color.white, transp=0)
+plotshape(series=isAboveEMA and isBelowLowerBand and isVolumeAboveThreshold, title="Buy Signal", text="BUY", color=color.green, location=location.belowbar, style=shape.labelup, textcolor=color.white, transp=0)
