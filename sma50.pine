@@ -1,0 +1,9 @@
+//@version=4
+study(title="Simple Moving Average", shorttitle="SMA", overlay=true)
+
+length = input(50, title="Length")
+src = input(close, title="Source")
+
+sma_value = sma(src, length)
+
+plot(sma_value, color=color.blue, title="SMA", linewidth=2)
